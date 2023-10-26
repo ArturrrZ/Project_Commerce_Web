@@ -1,6 +1,8 @@
 0. Take pictures of each item and mutual picture
 
 1. Create main page
+1.0.1 Header
+1.0.2. Footer
 1.1 Introduction
 1.2 Picture of table with text
 1.3 Button to navigate for more details
