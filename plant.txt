@@ -3,9 +3,7 @@
 1. Create main page
 
 
-1.1 Introduction
-1.2 Picture of table with text
-1.3 Button to navigate for more details
+
 
 2. Working desk with details for each item
 2.1 Create db of the items
@@ -28,3 +26,7 @@
 1.0.1 Header
 
 1.0.2. Footer
+
+1.1 Introduction
+1.2 Picture of table with text
+1.3 Button to navigate for more details
