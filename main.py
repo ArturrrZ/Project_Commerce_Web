@@ -13,6 +13,10 @@ def home():
 def check():
     return render_template("father_template.html")
 
+@app.route("/items")
+def display_items():
+    return render_template("items.html")
+
 
 
 
