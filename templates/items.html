@@ -1,2 +1,30 @@
 {%extends  'father_template.html'%}
 {%block title%} Items for sale {%endblock%}
+
+{%block main%}
+<div class="my-5">
+<hr/>
+<h2 class="my-5  display-5 fw-bold text-center">My working space below for SALE!</h2>
+    <hr/>
+</div>
+
+<div class="container mt-5">
+    <div class="row">
+
+        <div id="full_table_picture" class="col-lg-8">
+            <img src="./static/assets/img/items_for_sale/full_table_2.jpg" alt="picture of full computer desk with items on it" width="756" height="690">
+        </div>
+
+        <div id="items" class="col-lg-4">
+            <h1 class="fw-bold mb-5">Items:</h1>
+            {%for key,value in items.items()%}
+            <a href="{{url_for('sale',item=key)}}" style="color:black"><h5>{{value['title']}} - {{value['price']}}</h5>
+            </a>
+            <br/>
+            {%endfor%}
+        </div>
+
+    </div>
+
+</div>
+{%endblock%}
