@@ -9,7 +9,7 @@
 <div class="container mt-5">
 
 <div class="row">
-  <div class="col-lg-6">
+  <div class="col-lg-5 offset-2">
 <div id="carouselExampleIndicators" class="carousel slide">
     <div class="carousel-indicators">
       <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
@@ -20,6 +20,7 @@
       <div class="carousel-item active">
         <img src=".{{item['pic_1']}}" class="d-block w-100" alt="first picture of an item">
       </div>
+
       <div class="carousel-item">
         <img src=".{{item['pic_2']}}" class="d-block w-100" alt="second picture of an item">
       </div>
@@ -39,10 +40,22 @@
   </div>
 
 
-  <div class="col-lg-6">
-    <h2 class="text-center fw-bold">{{item['title']}} - {{item['price']}}</h2>
+  <div class="col-lg-5 ">
+    <h1 class="text-left fw-bold">{{item['title']}}</h1>
+      <h2>Price-{{item['price']}}</h2>
+      <br/>
+      <br/>
+    <p class="text-left mt-5 px-1"> {{ item["description"] }}</p>
+
+      <div class="d-grid mt-5">
+         <button class="btn btn-success" type="button">Add to cart</button>
+
+      </div>
+      <div class="d-flex justify-content-end mt-3"><a href="{{url_for('display_items')}}"><button class="btn btn-secondary " type="button">Go Back</button></a></div>
+
 
   </div>
+
 </div>
 </div>
 
