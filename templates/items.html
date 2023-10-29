@@ -11,14 +11,14 @@
 <div class="container mt-5">
     <div class="row">
 
-        <div id="full_table_picture" class="col-lg-6 offset-1">
-            <img src="./static/assets/img/items_for_sale/full_table_2.jpg" alt="picture of full computer desk with items on it" width="756" height="690">
+        <div id="full_table_picture" class="col-lg-5 offset-1">
+            <img src="./static/assets/img/items_for_sale/full_table_3.jpg" alt="picture of full computer desk with items on it" width="605" height="605">
         </div>
 
-        <div id="items" class="col-lg-4 offset-1">
+        <div id="items" class="col-lg-5 offset-1">
             <h1 class="fw-bold mb-5">Items:</h1>
             {%for key,value in items.items()%}
-            <a href="{{url_for('sale',item=key)}}" style="color:black"><h5>{{value['title']}} - {{value['price']}}</h5>
+            <a href="{{url_for('sale',item=key)}}" style="color:black"><h5>{{value['title']}} - {{value['price']}}$</h5>
             </a>
             <br/>
             {%endfor%}

@@ -6,7 +6,7 @@
 
 
 
-2.2 Each particulat page to see item
+
 
 
 
@@ -32,3 +32,4 @@
 
 2. Working desk with details for each item
 2.1 Create db of the items
+2.2 Each particulat page to see item

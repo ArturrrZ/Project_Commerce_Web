@@ -8,7 +8,7 @@ Bootstrap5(app)
 ITEMS_FOR_SALE={
     "chair": {
         "title": "Black Computer Chair",
-        "price": "30$",
+        "price": 30,
         "pic_1": "./static/assets/img/items_for_sale/chair_1.jpg",
         "pic_2": "./static/assets/img/items_for_sale/chair_2.jpg",
         "pic_3": "./static/assets/img/items_for_sale/chair_3.jpg",
@@ -22,7 +22,7 @@ ITEMS_FOR_SALE={
     },
     "table": {
         "title": "Glass Table",
-        "price": "50$",
+        "price": 50,
         "pic_1": "./static/assets/img/items_for_sale/table_1.jpg",
         "pic_2": "./static/assets/img/items_for_sale/table_2.jpg",
         "pic_3": "./static/assets/img/items_for_sale/table_3.jpg",
@@ -36,7 +36,7 @@ ITEMS_FOR_SALE={
     },
     "laptop": {
         "title": "ASUS TUF Dash F15 Gaming Laptop",
-        "price": "1000$",
+        "price": 1000,
         "pic_1": "./static/assets/img/items_for_sale/laptop_1.jpg",
         "pic_2": "./static/assets/img/items_for_sale/laptop_2.jpg",
         "pic_3": "./static/assets/img/items_for_sale/laptop_3.jpg",
@@ -50,7 +50,7 @@ ITEMS_FOR_SALE={
     },
     "mouse": {
         "title": "Logitech G305 Wireless Gaming Mouse",
-        "price": "20$",
+        "price": 20,
         "pic_1": "./static/assets/img/items_for_sale/mouse_1.jpg",
         "pic_2 ": "./static/assets/img/items_for_sale/mouse_2.jpg",
         "pic_3": "./static/assets/img/items_for_sale/mouse_3.jpg",
@@ -62,7 +62,7 @@ ITEMS_FOR_SALE={
     "mousepad":
         {
         "title": "Mouse Pad",
-        "price": "10$",
+        "price": 10,
         "pic_1": "./static/assets/img/items_for_sale/mousepad_1.jpg",
         "pic_2": "./static/assets/img/items_for_sale/mousepad_2.jpg",
         "pic_3": "./static/assets/img/items_for_sale/mousepad_3.jpg",
@@ -74,7 +74,7 @@ ITEMS_FOR_SALE={
     "book":
         {
         "title": "Atomic Habits by J.Clear",
-        "price": "10$",
+        "price": 10,
         "pic_1": "./static/assets/img/items_for_sale/book_1.jpg",
         "pic_2": "./static/assets/img/items_for_sale/book_2.jpg",
         "pic_3": "./static/assets/img/items_for_sale/book_3.jpg",
@@ -85,7 +85,7 @@ ITEMS_FOR_SALE={
     "notebook":
         {
         "title": "Study Notebook",
-        "price": "99$",
+        "price": 99,
         "pic_1": "./static/assets/img/items_for_sale/notebook_1.jpg",
         "pic_2": "./static/assets/img/items_for_sale/notebook_2.jpg",
         "pic_3": "./static/assets/img/items_for_sale/notebook_3.jpg",
