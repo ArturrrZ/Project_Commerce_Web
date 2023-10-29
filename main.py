@@ -1,7 +1,23 @@
 from flask import Flask, request,render_template,redirect
-
+from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap5
+from flask_login import UserMixin
+
 app=Flask(__name__)
+app.config['SECRET_KEY']="asdxzcz124aASDzzxc23145asfzzx"
+
+app.config['SQLALCHEMY_DATABASE_URI']=('sqlite:///database.db')
+db = SQLAlchemy()
+db.init_app(app)
+
+class User(UserMixin,db.Model):
+    id=db.Column(db.Integer, primary_key=True)
+    email=db.Column(db.String(250),unique=True,nullable=False)
+    password=db.Column(db.String(250),nullable=False)
+    name=db.Column(db.String(100),nullable=True)
+
+with app.app_context():
+    db.create_all()
 
 Bootstrap5(app)
 
