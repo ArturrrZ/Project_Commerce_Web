@@ -1,7 +1,9 @@
-from flask import Flask, request,render_template,redirect
+from flask import Flask, render_template,redirect, flash, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap5
 from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
+from forms import RegisterForm,LoginForm
 
 app=Flask(__name__)
 app.config['SECRET_KEY']="asdxzcz124aASDzzxc23145asfzzx"
@@ -14,7 +16,7 @@ class User(UserMixin,db.Model):
     id=db.Column(db.Integer, primary_key=True)
     email=db.Column(db.String(250),unique=True,nullable=False)
     password=db.Column(db.String(250),nullable=False)
-    name=db.Column(db.String(100),nullable=True)
+    name=db.Column(db.String(100),nullable=False)
 
 with app.app_context():
     db.create_all()
@@ -132,13 +134,50 @@ def sale(item):
     print(ITEMS_FOR_SALE[item])
     return render_template('item_separate.html', item=ITEMS_FOR_SALE[item],name=item)
 
-@app.route("/register")
+@app.route("/register", methods=['POST','GET'])
 def register():
-    return render_template('register.html')
+    register_form=RegisterForm()
+    if register_form.validate_on_submit():
+        email=register_form.email.data
+        password=register_form.password.data
+        hash_password=generate_password_hash(password,method='pbkdf2:sha256',salt_length=8)
+        name=register_form.name.data
+        find_user=db.session.execute(db.select(User).where(User.email==email)).scalar()
+        if find_user:
+            flash("You've already signed up with that email, log in instead!")
+            return redirect(url_for('login'))
+        else:
+            new_user=User(
+                email=email,
+                password=hash_password,
+                name=name,
+            )
+            db.session.add(new_user)
+            db.session.commit()
+            #login
+            return redirect(url_for('home'))
 
-@app.route("/login")
+
+    return render_template('register.html',form=register_form)
+
+@app.route("/login",methods=['POST','GET'])
 def login():
-    return render_template('login.html')
+    login_form=LoginForm()
+    if login_form.validate_on_submit():
+        email = login_form.email.data
+        password = login_form.password.data
+        find_user = db.session.execute(db.select(User).where(User.email == email)).scalar()
+        if not find_user:
+            flash("Invalid email, try again.")
+            return redirect(url_for('login'))
+        elif not check_password_hash(find_user.password, password):
+            flash('Invalid password, try again')
+            return redirect(url_for('login'))
+        else:
+            return "You logged in!"
+
+
+    return render_template('login.html',form=login_form)
 
 
 

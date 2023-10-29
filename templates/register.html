@@ -1,5 +1,5 @@
 {%extends 'father_template.html'%}
-
+{% from "bootstrap5/form.html" import render_form %}
 {%block title%}Register Page{%endblock%}
 
 {%block main%}
@@ -9,13 +9,14 @@
 
 
 <div class="container">
-
     <h1 class="Login">Register page</h1>
     <hr>
-    <form>
-    <input type="email" name="email" value="example@gmail.com">
-    <input type="submit">
-</form>
+    <div class="row">
+
+        <div class="col-lg-4 offset-4">
+            {{ render_form(form,novalidate=True, button_map={"submit": "primary"}) }}
+        </div>
+    </div>
 </div>
 
 
