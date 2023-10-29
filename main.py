@@ -132,6 +132,14 @@ def sale(item):
     print(ITEMS_FOR_SALE[item])
     return render_template('item_separate.html', item=ITEMS_FOR_SALE[item],name=item)
 
+@app.route("/register")
+def register():
+    return render_template('register.html')
+
+@app.route("/login")
+def login():
+    return render_template('login.html')
+
 
 
 
