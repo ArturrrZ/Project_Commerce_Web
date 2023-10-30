@@ -1,5 +1,6 @@
 from flask import Flask, render_template,redirect, flash, url_for
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import relationship
 from flask_bootstrap import Bootstrap5
 from flask_login import UserMixin, login_user, logout_user,login_required, LoginManager, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -20,10 +21,21 @@ def load_user(user_id):
     return db.get_or_404(User,user_id)
 
 class User(UserMixin,db.Model):
+    __tablename__ = "User"
     id=db.Column(db.Integer, primary_key=True)
     email=db.Column(db.String(250),unique=True,nullable=False)
     password=db.Column(db.String(250),nullable=False)
     name=db.Column(db.String(100),nullable=False)
+
+    items = relationship("Item", back_populates="owner")
+class Item(db.Model):
+    __tablename__ = "items"
+    id=db.Column(db.Integer, primary_key=True)
+    title=db.Column(db.String(250),unique=True)
+    price=db.Column(db.Integer,unique=False)
+    #
+    owner = relationship("User", back_populates="items")
+    kid_id = db.Column(db.Integer, db.ForeignKey("User.id"))
 
 with app.app_context():
     db.create_all()
@@ -121,6 +133,12 @@ ITEMS_FOR_SALE={
 
 }
 
+def find_key_by_value(dictionary, search_value):
+    for key, value in dictionary.items():
+        if "price" in value and value["price"] == search_value:
+            return key
+    return None  # Return None if the value is not found in the dictionary
+
 
 
 @app.route("/")
@@ -142,7 +160,7 @@ def display_items():
 
 @app.route("/sale/<item>")
 def sale(item):
-    print(ITEMS_FOR_SALE[item])
+    # print(ITEMS_FOR_SALE[item])
     return render_template('item_separate.html', item=ITEMS_FOR_SALE[item],name=item)
 
 @app.route("/register", methods=['POST','GET'])
@@ -215,11 +233,20 @@ def cart():
     print(current_user.id)
     return render_template('cart.html')
 
-@app.route("/add_item/<it>")
-def add_item(it):
+@app.route("/add_item/<price>")
+def add_item(price):
     if not current_user.is_authenticated:
         return redirect('login')
-    print(it)
+
+    price_int=int(price.strip("-"))
+
+
+    result = find_key_by_value(ITEMS_FOR_SALE, price_int)
+
+    if result is not None:
+        print(f"The item with price {price_int} is associated with the key '{result}'")
+    else:
+        print(f"No item found with price {price_int}")
     #db.getor404
     #if item:
     #flash u added that already
@@ -228,7 +255,7 @@ def add_item(it):
     #add price
     #redirect to cart
     #and show its own cart
-    return "asd"
+    return render_template('test.html',price=price)
 
 
 
