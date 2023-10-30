@@ -129,7 +129,7 @@ def home():
     if current_user.is_authenticated:
         print("LOGGED")
 
-    return render_template('home.html')
+    return render_template('home.html',current_user=current_user)
 
 @app.route("/check_father")
 def check():
@@ -169,7 +169,7 @@ def register():
 
 
             login_user(new_user)
-            return redirect(url_for('logged'))
+            return redirect(url_for('home'))
 
 
     return render_template('register.html',form=register_form)
@@ -190,7 +190,7 @@ def login():
         else:
 
             login_user(find_user)
-            return redirect(url_for('logged'))
+            return redirect(url_for('home'))
 
 
     return render_template('login.html',form=login_form)
