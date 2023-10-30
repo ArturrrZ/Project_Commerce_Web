@@ -1,7 +1,7 @@
 from flask import Flask, render_template,redirect, flash, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap5
-from flask_login import UserMixin
+from flask_login import UserMixin, login_user, logout_user,login_required, LoginManager, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from forms import RegisterForm,LoginForm
 
@@ -11,6 +11,13 @@ app.config['SECRET_KEY']="asdxzcz124aASDzzxc23145asfzzx"
 app.config['SQLALCHEMY_DATABASE_URI']=('sqlite:///database.db')
 db = SQLAlchemy()
 db.init_app(app)
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return db.get_or_404(User,user_id)
 
 class User(UserMixin,db.Model):
     id=db.Column(db.Integer, primary_key=True)
@@ -118,6 +125,10 @@ ITEMS_FOR_SALE={
 
 @app.route("/")
 def home():
+    print(current_user.is_authenticated)
+    if current_user.is_authenticated:
+        print("LOGGED")
+
     return render_template('home.html')
 
 @app.route("/check_father")
@@ -144,6 +155,7 @@ def register():
         name=register_form.name.data
         find_user=db.session.execute(db.select(User).where(User.email==email)).scalar()
         if find_user:
+            #TODO no see
             flash("You've already signed up with that email, log in instead!")
             return redirect(url_for('login'))
         else:
@@ -154,8 +166,10 @@ def register():
             )
             db.session.add(new_user)
             db.session.commit()
-            #login
-            return redirect(url_for('home'))
+
+
+            login_user(new_user)
+            return redirect(url_for('logged'))
 
 
     return render_template('register.html',form=register_form)
@@ -174,10 +188,25 @@ def login():
             flash('Invalid password, try again')
             return redirect(url_for('login'))
         else:
-            return "You logged in!"
+
+            login_user(find_user)
+            return redirect(url_for('logged'))
 
 
     return render_template('login.html',form=login_form)
+
+
+@app.route("/logged")
+@login_required
+def logged():
+    return "You logged in!"
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    print("you logged out")
+    return redirect(url_for('home'))
 
 
 
