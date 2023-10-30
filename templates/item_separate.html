@@ -48,10 +48,11 @@
     <p class="text-left mt-5 px-1"> {{ item["description"] }}</p>
 
       <div class="d-grid mt-5">
+          <a href="{{url_for('cart')}}">
          <button class="btn btn-success" type="button">Add to cart</button>
-
+          </a>
       </div>
-      <div class="d-flex justify-content-end mt-3"><a href="{{url_for('display_items')}}"><button class="btn btn-secondary " type="button">Go Back</button></a></div>
+      <div class="d-flex justify-content-start mt-3"><a href="{{url_for('display_items')}}"><button class="btn btn-secondary " type="button">Go Back</button></a></div>
 
 
   </div>

@@ -208,6 +208,10 @@ def logout():
     print("you logged out")
     return redirect(url_for('home'))
 
+@app.route("/cart")
+def cart():
+    return render_template('cart.html')
+
 
 
 
