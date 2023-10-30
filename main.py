@@ -5,9 +5,9 @@ from flask_bootstrap import Bootstrap5
 from flask_login import UserMixin, login_user, logout_user,login_required, LoginManager, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from forms import RegisterForm,LoginForm
-
+import os
 app=Flask(__name__)
-app.config['SECRET_KEY']="asdxzcz124aASDzzxc23145asfzzx"
+app.config['SECRET_KEY']=os.environ.get('SECRET_KEY')
 
 app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///database.db'
 db = SQLAlchemy()
