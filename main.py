@@ -145,7 +145,7 @@ def find_key_by_value(dictionary, search_value):
 
 @app.route("/")
 def home():
-    print(current_user.is_authenticated)
+    # print(current_user.is_authenticated)
     user = None
     if current_user.is_authenticated:
         print("LOGGED")
@@ -232,14 +232,14 @@ def logged():
 @login_required
 def logout():
     logout_user()
-    print("you logged out")
+    # print("you logged out")
     return redirect(url_for('home'))
 
 @app.route("/cart",methods=['POST','GET'])
 def cart():
     if not current_user.is_authenticated:
         return redirect('login')
-    print(current_user.id)
+    # print(current_user.id)
     user=db.get_or_404(User,current_user.id)
     if user:
         total=0
@@ -263,7 +263,7 @@ def add_item(price):
     result = find_key_by_value(ITEMS_FOR_SALE, price_int)
 
     if result is not None:
-        print(f"The item with price {price_int} is associated with the key '{result}'")
+        # print(f"The item with price {price_int} is associated with the key '{result}'")
         user=current_user
         item = Item.query.filter_by(key=result, user_id=user.id).first()
         if item:
