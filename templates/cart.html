@@ -1,2 +1,64 @@
 {%extends 'father_template.html'%}
 {%block title %}Cart{%endblock%}
+{%block main%}
+
+<div class="container">
+    <div class="row">
+
+        <div class="col-lg-6 offset-2">
+
+            <h1>Item:</h1>
+        </div>
+
+        <div class="col-lg-3">
+            <h1>Price</h1>
+        </div>
+
+    </div>
+<hr>
+</div>
+
+
+<div class="container mt-5">
+    <div class="row">
+        <div class=" mb-5 col-lg-12 text-center display-6 fw-bold">{{user.name}}'s cart</div>
+        {%for item in user.items%}
+        <div class="col-lg-6 offset-2">
+
+            <h3>{{item.title}} </h3>
+        </div>
+
+        <div class="col-lg-3">
+            <h3>{{item.price}}.00 <a href="{{url_for('delete',item_id=item.id)}}">x</a></h3>
+
+
+        </div>
+        {%endfor%}
+
+        <div class="col-lg-6 offset-2 mt-5">
+
+            <h3>Total:</h3>
+            <div class="mt-5">
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            {% for message in messages %}
+            <p class="flash">{{ message }}</p>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+                </div>
+        </div>
+
+        <div class="col-lg-3 mt-5">
+            <h3>{{total}}.00$</h3>
+            <form method="POST" action="{{ url_for('cart') }}">
+             <button type="submit" class="btn btn-success mt-5">Checkout</button>
+            </form>
+        </div>
+
+    </div>
+
+</div>
+
+
+{%endblock%}

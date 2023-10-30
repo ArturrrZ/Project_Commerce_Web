@@ -11,6 +11,13 @@
 <div class="container">
     <h1 class="Login">Register page</h1>
     <hr>
+    {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            {% for message in messages %}
+            <p class="flash">{{ message }}</p>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
     <div class="row">
 
         <div class="col-lg-4 offset-4">

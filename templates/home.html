@@ -11,6 +11,9 @@
     <div class="row text-center" style="padding-top: 200px" >
         <div class="">
         <h1 class="display-1 fw-bold ">Welcome!</h1>
+        {%if user%}
+        <h2 class="display-2 fw-bold ">{{user.name}}</h2>
+        {%endif%}
             </div>
         <div class="my-5 pb-5">
             <p>Artur's marketplace it is the best place to buy used stuff ever!</p>
