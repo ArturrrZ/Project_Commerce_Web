@@ -48,7 +48,7 @@
     <p class="text-left mt-5 px-1"> {{ item["description"] }}</p>
 
       <div class="d-grid mt-5">
-          <a href="{{url_for('cart')}}">
+          <a href="{{url_for('add_item',it=item['title'])}}">
          <button class="btn btn-success" type="button">Add to cart</button>
           </a>
       </div>

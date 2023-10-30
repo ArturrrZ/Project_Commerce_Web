@@ -212,10 +212,23 @@ def logout():
 def cart():
     if not current_user.is_authenticated:
         return redirect('login')
+    print(current_user.id)
     return render_template('cart.html')
 
-
-
+@app.route("/add_item/<it>")
+def add_item(it):
+    if not current_user.is_authenticated:
+        return redirect('login')
+    print(it)
+    #db.getor404
+    #if item:
+    #flash u added that already
+    #else:
+    #current_user related database add (item)
+    #add price
+    #redirect to cart
+    #and show its own cart
+    return "asd"
 
 
 
