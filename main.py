@@ -210,6 +210,8 @@ def logout():
 
 @app.route("/cart")
 def cart():
+    if not current_user.is_authenticated:
+        return redirect('login')
     return render_template('cart.html')
 
 
