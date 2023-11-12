@@ -36,7 +36,7 @@ class Item(UserMixin,db.Model):
 
     comments=db.relationship("Comment",backref="item")
 
-class User(UserMixin,db.Model):
+class Users(UserMixin,db.Model):
 
     id=db.Column(db.Integer, primary_key=True)
     email=db.Column(db.String(250),unique=True,nullable=False)
@@ -52,7 +52,7 @@ class Cart(db.Model):
     title=db.Column(db.String(250),unique=False,nullable=False)
     price=db.Column(db.Integer,unique=False,nullable=False)
     #
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"),nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"),nullable=False)
     # owner = relationship("User", back_populates="items")
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True, unique=True)
@@ -60,7 +60,7 @@ class Comment(db.Model):
     body = db.Column(db.String(250), unique=False,nullable=False)
 
     item_id=db.Column(db.Integer,db.ForeignKey("item.id"),nullable=False)
-    user_id=db.Column(db.Integer,db.ForeignKey("user.id"),nullable=False)
+    user_id=db.Column(db.Integer,db.ForeignKey("users.id"),nullable=False)
 
 
 
@@ -182,6 +182,11 @@ def dictionary_to_database():
 #marketplace=# ALTER SEQUENCE item_id_seq RESTART WITH 1;
 # with app.app_context():
 #     dictionary_to_database()
+
+with app.app_context():
+    all=db.session.execute(db.select(Item)).scalars()
+    for _ in all:
+        print(_.comments)
 
 
 #
