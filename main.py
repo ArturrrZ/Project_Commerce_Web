@@ -8,10 +8,14 @@ from forms import RegisterForm,LoginForm
 import os
 app=Flask(__name__)
 app.config['SECRET_KEY']=os.environ.get('SECRET_KEY')
+PSQL_PASSWORD=os.environ.get('PSQL_PASSWORD')
 
-app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://postgres:{PSQL_PASSWORD}@localhost/marketplace'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 db = SQLAlchemy()
 db.init_app(app)
+
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -20,28 +24,48 @@ login_manager.init_app(app)
 def load_user(user_id):
     return db.get_or_404(User,user_id)
 
+class Item(UserMixin,db.Model):
+    id=db.Column(db.Integer,primary_key=True)
+    name = db.Column(db.String(250),  nullable=False)
+    title = db.Column(db.String(250), nullable=False)
+    description = db.Column(db.String(550),  nullable=False)
+    price = db.Column(db.Integer, nullable=False)
+    path_picture_1 = db.Column(db.String(550), nullable=False)
+    path_picture_2 = db.Column(db.String(550), nullable=False)
+    path_picture_3 = db.Column(db.String(550), nullable=False)
+
+    comments=db.relationship("Comment",backref="item")
+
 class User(UserMixin,db.Model):
-    __tablename__ = "user"
+
     id=db.Column(db.Integer, primary_key=True)
     email=db.Column(db.String(250),unique=True,nullable=False)
     password=db.Column(db.String(250),nullable=False)
     name=db.Column(db.String(100),nullable=False)
 
-    items = relationship("Item", back_populates="owner")
-class Item(db.Model):
-    __tablename__ = "items"
+    items = relationship("Cart", backref="owner")
+    comments=relationship("Comment", backref="user")
+class Cart(db.Model):
+
     id=db.Column(db.Integer, primary_key=True,unique=True)
-    key=title=db.Column(db.String(250),unique=False)
-    title=db.Column(db.String(250),unique=False)
-    price=db.Column(db.Integer,unique=False)
+    key=title=db.Column(db.String(250),unique=False,nullable=True)
+    title=db.Column(db.String(250),unique=False,nullable=False)
+    price=db.Column(db.Integer,unique=False,nullable=False)
     #
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"),nullable=False)
+    # owner = relationship("User", back_populates="items")
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True, unique=True)
+    user_name = db.Column(db.String(250), unique=False, nullable=False)
+    body = db.Column(db.String(250), unique=False,nullable=False)
 
-    owner = relationship("User", back_populates="items")
+    item_id=db.Column(db.Integer,db.ForeignKey("item.id"),nullable=False)
+    user_id=db.Column(db.Integer,db.ForeignKey("user.id"),nullable=False)
 
 
-with app.app_context():
-    db.create_all()
+
+# with app.app_context():
+#     db.create_all()
 
 Bootstrap5(app)
 
@@ -92,7 +116,7 @@ ITEMS_FOR_SALE={
         "title": "Logitech G305 Wireless Gaming Mouse",
         "price": 20,
         "pic_1": "./static/assets/img/items_for_sale/mouse_1.jpg",
-        "pic_2 ": "./static/assets/img/items_for_sale/mouse_2.jpg",
+        "pic_2": "./static/assets/img/items_for_sale/mouse_2.jpg",
         "pic_3": "./static/assets/img/items_for_sale/mouse_3.jpg",
         "description": "Get ready to up your gaming performance with the Logitech G305 Wireless Gaming Mouse. "
                        "This cutting-edge "
@@ -135,185 +159,210 @@ ITEMS_FOR_SALE={
         }
 
 }
+def dictionary_to_database():
+    global ITEMS_FOR_SALE
+    for key, value in ITEMS_FOR_SALE.items():
 
-def find_key_by_value(dictionary, search_value):
-    for key, value in dictionary.items():
-        if "price" in value and value["price"] == search_value:
-            return key
-    return None  # Return None if the value is not found in the dictionary
+        # print(key)
+        # print(value)
 
-
-
-@app.route("/")
-def home():
-    # print(current_user.is_authenticated)
-    user = None
-    if current_user.is_authenticated:
-        print("LOGGED")
-        user = db.get_or_404(User, current_user.id)
-
-
-
-
-
-    return render_template('home.html',current_user=current_user,user=user)
-
-@app.route("/check_father")
-def check():
-    return render_template("father_template.html")
-
-@app.route("/items")
-def display_items():
-    return render_template("items.html", items=ITEMS_FOR_SALE)
-
-
-@app.route("/sale/<item>")
-def sale(item):
-    # print(ITEMS_FOR_SALE[item])
-    return render_template('item_separate.html', item=ITEMS_FOR_SALE[item],name=item)
-
-@app.route("/register", methods=['POST','GET'])
-def register():
-    register_form=RegisterForm()
-    if register_form.validate_on_submit():
-        email=register_form.email.data
-        password=register_form.password.data
-        hash_password=generate_password_hash(password,method='pbkdf2:sha256',salt_length=8)
-        name=register_form.name.data
-        find_user=db.session.execute(db.select(User).where(User.email==email)).scalar()
-        if find_user:
-            #TODO no see
-            flash("You've already signed up with that email, log in instead!")
-
-            return redirect(url_for('login'))
-        else:
-            new_user=User(
-                email=email,
-                password=hash_password,
-                name=name,
-            )
-            db.session.add(new_user)
-            db.session.commit()
-
-
-            login_user(new_user)
-            return redirect(url_for('home'))
-
-
-    return render_template('register.html',form=register_form)
-
-@app.route("/login",methods=['POST','GET'])
-def login():
-    login_form=LoginForm()
-    if login_form.validate_on_submit():
-        email = login_form.email.data
-        password = login_form.password.data
-        find_user = db.session.execute(db.select(User).where(User.email == email)).scalar()
-        if not find_user:
-            flash("Invalid email, try again.")
-            return redirect(url_for('register'))
-        elif not check_password_hash(find_user.password, password):
-            flash('Invalid password, try again')
-            return redirect(url_for('login'))
-        else:
-
-            login_user(find_user)
-            return redirect(url_for('home'))
-
-
-    return render_template('login.html',form=login_form)
-
-
-@app.route("/logged")
-@login_required
-def logged():
-    return "You logged in!"
-
-@app.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    # print("you logged out")
-    return redirect(url_for('home'))
-
-@app.route("/cart",methods=['POST','GET'])
-def cart():
-    if not current_user.is_authenticated:
-        return redirect('login')
-    # print(current_user.id)
-    user=db.get_or_404(User,current_user.id)
-    if user:
-        total=0
-        for item in user.items:
-            total += item.price
-    if request.method=='POST':
-        flash("It's just a study project not a commercial one. However, thank you for interest!")
-
-
-    return render_template('cart.html', total=total,user=user)
-
-
-@app.route("/add_item/<price>")
-def add_item(price):
-    if not current_user.is_authenticated:
-        return redirect('login')
-
-    price_int=int(price.strip("-"))
-
-
-    result = find_key_by_value(ITEMS_FOR_SALE, price_int)
-
-    if result is not None:
-        # print(f"The item with price {price_int} is associated with the key '{result}'")
-        user=current_user
-        item = Item.query.filter_by(key=result, user_id=user.id).first()
-        if item:
-            # flash("You've already added this item to your cart.")
-             pass
-        else:
-            new_item=Item(
-                key=result,
-                title=ITEMS_FOR_SALE[result]['title'],
-                price=price,
-                user_id=user.id
-            )
-            db.session.add(new_item)
-            db.session.commit()
-            flash("Item added to your cart successfully.")
-            return redirect(url_for('cart'))
-
-    else:
-        print(f"No item found with price {price_int}")
-
-    return redirect(url_for('cart'))
-
-
-@app.route("/delete<item_id>")
-@login_required
-def delete(item_id):
-    item=db.get_or_404(Item,item_id)
-    if item:
-        db.session.delete(item)
+        new_item=Item(
+            name=key,
+            title = value['title'],
+            description = value['description'],
+            price = value['price'],
+            path_picture_1 = value['pic_1'],
+            path_picture_2 = value['pic_2'],
+            path_picture_3 = value['pic_3'],
+        )
+        db.session.add(new_item)
         db.session.commit()
-        return redirect("cart")
+
+    return print('Data was transfared to db!')
+#marketplace=# ALTER SEQUENCE item_id_seq RESTART WITH 1;
+# with app.app_context():
+#     dictionary_to_database()
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-if __name__ == "__main__":
-    app.run(debug=False)
+#
+# def find_key_by_value(dictionary, search_value):
+#     for key, value in dictionary.items():
+#         if "price" in value and value["price"] == search_value:
+#             return key
+#     return None  # Return None if the value is not found in the dictionary
+#
+#
+#
+# @app.route("/")
+# def home():
+#     # print(current_user.is_authenticated)
+#     user = None
+#     if current_user.is_authenticated:
+#         print("LOGGED")
+#         user = db.get_or_404(User, current_user.id)
+#
+#
+#
+#
+#
+#     return render_template('home.html',current_user=current_user,user=user)
+#
+# @app.route("/check_father")
+# def check():
+#     return render_template("father_template.html")
+#
+# @app.route("/items")
+# def display_items():
+#     return render_template("items.html", items=ITEMS_FOR_SALE)
+#
+#
+# @app.route("/sale/<item>")
+# def sale(item):
+#     # print(ITEMS_FOR_SALE[item])
+#     return render_template('item_separate.html', item=ITEMS_FOR_SALE[item],name=item)
+#
+# @app.route("/register", methods=['POST','GET'])
+# def register():
+#     register_form=RegisterForm()
+#     if register_form.validate_on_submit():
+#         email=register_form.email.data
+#         password=register_form.password.data
+#         hash_password=generate_password_hash(password,method='pbkdf2:sha256',salt_length=8)
+#         name=register_form.name.data
+#         find_user=db.session.execute(db.select(User).where(User.email==email)).scalar()
+#         if find_user:
+#             #TODO no see
+#             flash("You've already signed up with that email, log in instead!")
+#
+#             return redirect(url_for('login'))
+#         else:
+#             new_user=User(
+#                 email=email,
+#                 password=hash_password,
+#                 name=name,
+#             )
+#             db.session.add(new_user)
+#             db.session.commit()
+#
+#
+#             login_user(new_user)
+#             return redirect(url_for('home'))
+#
+#
+#     return render_template('register.html',form=register_form)
+#
+# @app.route("/login",methods=['POST','GET'])
+# def login():
+#     login_form=LoginForm()
+#     if login_form.validate_on_submit():
+#         email = login_form.email.data
+#         password = login_form.password.data
+#         find_user = db.session.execute(db.select(User).where(User.email == email)).scalar()
+#         if not find_user:
+#             flash("Invalid email, try again.")
+#             return redirect(url_for('register'))
+#         elif not check_password_hash(find_user.password, password):
+#             flash('Invalid password, try again')
+#             return redirect(url_for('login'))
+#         else:
+#
+#             login_user(find_user)
+#             return redirect(url_for('home'))
+#
+#
+#     return render_template('login.html',form=login_form)
+#
+#
+# @app.route("/logged")
+# @login_required
+# def logged():
+#     return "You logged in!"
+#
+# @app.route("/logout")
+# @login_required
+# def logout():
+#     logout_user()
+#     # print("you logged out")
+#     return redirect(url_for('home'))
+#
+# @app.route("/cart",methods=['POST','GET'])
+# def cart():
+#     if not current_user.is_authenticated:
+#         return redirect('login')
+#     # print(current_user.id)
+#     user=db.get_or_404(User,current_user.id)
+#     if user:
+#         total=0
+#         for item in user.items:
+#             total += item.price
+#     if request.method=='POST':
+#         flash("It's just a study project not a commercial one. However, thank you for interest!")
+#
+#
+#     return render_template('cart.html', total=total,user=user)
+#
+#
+# @app.route("/add_item/<price>")
+# def add_item(price):
+#     if not current_user.is_authenticated:
+#         return redirect('login')
+#
+#     price_int=int(price.strip("-"))
+#
+#
+#     result = find_key_by_value(ITEMS_FOR_SALE, price_int)
+#
+#     if result is not None:
+#         # print(f"The item with price {price_int} is associated with the key '{result}'")
+#         user=current_user
+#         item = Item.query.filter_by(key=result, user_id=user.id).first()
+#         if item:
+#             # flash("You've already added this item to your cart.")
+#              pass
+#         else:
+#             new_item=Item(
+#                 key=result,
+#                 title=ITEMS_FOR_SALE[result]['title'],
+#                 price=price,
+#                 user_id=user.id
+#             )
+#             db.session.add(new_item)
+#             db.session.commit()
+#             flash("Item added to your cart successfully.")
+#             return redirect(url_for('cart'))
+#
+#     else:
+#         print(f"No item found with price {price_int}")
+#
+#     return redirect(url_for('cart'))
+#
+#
+# @app.route("/delete<item_id>")
+# @login_required
+# def delete(item_id):
+#     item=db.get_or_404(Item,item_id)
+#     if item:
+#         db.session.delete(item)
+#         db.session.commit()
+#         return redirect("cart")
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+# if __name__ == "__main__":
+#     app.run(debug=False)
 
 
