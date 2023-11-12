@@ -22,7 +22,7 @@ login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.get_or_404(User,user_id)
+    return db.get_or_404(Users,user_id)
 
 class Item(UserMixin,db.Model):
     id=db.Column(db.Integer,primary_key=True)
@@ -57,7 +57,7 @@ class Cart(db.Model):
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True, unique=True)
     user_name = db.Column(db.String(250), unique=False, nullable=False)
-    body = db.Column(db.String(250), unique=False,nullable=False)
+    body = db.Column(db.String(500), unique=False,nullable=False)
 
     item_id=db.Column(db.Integer,db.ForeignKey("item.id"),nullable=False)
     user_id=db.Column(db.Integer,db.ForeignKey("users.id"),nullable=False)
@@ -186,7 +186,11 @@ def dictionary_to_database():
 with app.app_context():
     all=db.session.execute(db.select(Item)).scalars()
     for _ in all:
-        print(_.comments)
+        print(_.comments[0].body)
+        break
+    comment=db.get_or_404(Comment,2)
+    print(comment.user.email)
+    print(comment.item.title)
 
 
 #
