@@ -35,6 +35,7 @@ class Item(UserMixin,db.Model):
     path_picture_3 = db.Column(db.String(550), nullable=False)
 
     comments=db.relationship("Comment",backref="item")
+    carts=db.relationship("Cart",backref="item")
 
 class Users(UserMixin,db.Model):
 
@@ -43,7 +44,7 @@ class Users(UserMixin,db.Model):
     password=db.Column(db.String(550),nullable=False)
     name=db.Column(db.String(100),nullable=False)
 
-    items = relationship("Cart", backref="owner")
+    items = relationship("Cart", backref="user")
     comments=relationship("Comment", backref="user")
 class Cart(db.Model):
 
@@ -51,7 +52,7 @@ class Cart(db.Model):
     key=title=db.Column(db.String(250),unique=False,nullable=True)
     title=db.Column(db.String(250),unique=False,nullable=False)
     price=db.Column(db.Integer,unique=False,nullable=False)
-    #
+    item_id=db.Column (db.Integer, db.ForeignKey("item.id") ,nullable= False)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"),nullable=False)
     # owner = relationship("User", back_populates="items")
 class Comment(db.Model):
@@ -338,6 +339,7 @@ def add_item(price):
                 key=result.name,
                 title=result.title,
                 price=result.price,
+                item_id=result.id,
                 user_id=user.id
             )
             db.session.add(new_item)
@@ -361,15 +363,22 @@ def delete(item_id):
 
 
 
+def checking_for_reference():
+    with app.app_context():
+        us=db.get_or_404(Users,1)
+        print(us.email)
+        for _ in us.items:
+            print(_.title)
+            print(_.item.title)
 
-# with app.app_context():
-#     us=db.get_or_404(Users,1)
-#     print(us.email)
-#     for _ in us.items:
-#         print(_.title)
+        cart_item=db.get_or_404(Cart,1)
+        print(cart_item.title + "\nAnd customer who wants this item: ")
+        print(cart_item.user.email + " \n----------- ")
 
-
-
+        ArturZiianbaev=db.get_or_404(Users,2)
+        print(ArturZiianbaev.email + f" 1st item in the cart is: {ArturZiianbaev.items[0].title} for"
+                                     f" {ArturZiianbaev.items[0].price}$"
+                                     f"\nAnd description: {ArturZiianbaev.items[0].item.description}")
 
 
 
