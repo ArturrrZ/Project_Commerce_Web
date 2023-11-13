@@ -5,6 +5,11 @@ from flask_bootstrap import Bootstrap5
 from flask_login import UserMixin, login_user, logout_user,login_required, LoginManager, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from forms import RegisterForm,LoginForm
+
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField
+from wtforms.validators import DataRequired, Email, Length
+
 import os
 app=Flask(__name__)
 app.config['SECRET_KEY']=os.environ.get('SECRET_KEY')
@@ -20,6 +25,12 @@ db.init_app(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+class CommentForm(FlaskForm):
+
+    body = StringField(label='Comment:', validators=[DataRequired(), Length(min=5)],
+                          render_kw={"placeholder": "Hi, my name is Artur Ziianbaev. I'd like to ..."})
+    submit=SubmitField(label='Submit')
+
 @login_manager.user_loader
 def load_user(user_id):
     return db.get_or_404(Users,user_id)
@@ -33,8 +44,8 @@ class Item(UserMixin,db.Model):
     path_picture_1 = db.Column(db.String(550), nullable=False)
     path_picture_2 = db.Column(db.String(550), nullable=False)
     path_picture_3 = db.Column(db.String(550), nullable=False)
-
-    comments=db.relationship("Comment",backref="item")
+                                                    #one to many for  One to One use uselist=False instead#
+    comments=db.relationship("Comment",backref="item",uselist=True)
     carts=db.relationship("Cart",backref="item")
 
 class Users(UserMixin,db.Model):
@@ -228,13 +239,19 @@ def display_items():
     return render_template("items.html", items=items)
 
 
-@app.route("/sale/<item>")
+@app.route("/sale/<item>",methods=['GET','POST'])
 def sale(item):
     # print(ITEMS_FOR_SALE[item])
     # return render_template('item_separate.html', item=ITEMS_FOR_SALE[item],name=item)
-
+    form=CommentForm()
     item_for_sale = db.session.execute(db.select(Item).where(Item.name == item)).scalar()
-    return  render_template('item_separate.html',item=item_for_sale)
+    if form.validate_on_submit():
+        body=form.body.data
+        print(body)
+        return redirect(url_for('sale',item=item))
+        # return render_template('item_separate.html',item=item_for_sale,form=form)
+
+    return  render_template('item_separate.html',item=item_for_sale,form=form)
 
 @app.route("/register", methods=['POST','GET'])
 def register():
