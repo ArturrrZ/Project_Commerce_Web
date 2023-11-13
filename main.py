@@ -40,7 +40,7 @@ class Users(UserMixin,db.Model):
 
     id=db.Column(db.Integer, primary_key=True)
     email=db.Column(db.String(250),unique=True,nullable=False)
-    password=db.Column(db.String(250),nullable=False)
+    password=db.Column(db.String(550),nullable=False)
     name=db.Column(db.String(100),nullable=False)
 
     items = relationship("Cart", backref="owner")
@@ -64,8 +64,8 @@ class Comment(db.Model):
 
 
 
-# with app.app_context():
-#     db.create_all()
+with app.app_context():
+    db.create_all()
 
 Bootstrap5(app)
 
@@ -74,7 +74,7 @@ ITEMS_FOR_SALE={
         "title": "Black Computer Chair",
         "price": 30,
         "pic_1": "./static/assets/img/items_for_sale/chair_1.jpg",
-        "pic_2 ": "./static/assets/img/items_for_sale/chair_2.jpg",
+        "pic_2": "./static/assets/img/items_for_sale/chair_2.jpg",
         "pic_3": "./static/assets/img/items_for_sale/chair_3.jpg",
         "description": "Introducing the epitome of comfort and sophistication – our Black Leather Chair. This elegant "
                        "and luxurious chair is"
@@ -182,15 +182,15 @@ def dictionary_to_database():
 #marketplace=# ALTER SEQUENCE item_id_seq RESTART WITH 1;
 # with app.app_context():
 #     dictionary_to_database()
-
-with app.app_context():
-    all=db.session.execute(db.select(Item)).scalars()
-    for _ in all:
-        print(_.comments[0].body)
-        break
-    comment=db.get_or_404(Comment,2)
-    print(comment.user.email)
-    print(comment.item.title)
+def check_reference():
+    with app.app_context():
+        all=db.session.execute(db.select(Item)).scalars()
+        for _ in all:
+            print(_.comments[0].body)
+            break
+        comment=db.get_or_404(Comment,2)
+        print(comment.user.email)
+        print(comment.item.title)
 
 
 
@@ -243,14 +243,14 @@ def register():
         password=register_form.password.data
         hash_password=generate_password_hash(password,method='pbkdf2:sha256',salt_length=8)
         name=register_form.name.data
-        find_user=db.session.execute(db.select(User).where(User.email==email)).scalar()
+        find_user=db.session.execute(db.select(Users).where(Users.email==email)).scalar()
         if find_user:
-            #TODO no see
+
             flash("You've already signed up with that email, log in instead!")
 
             return redirect(url_for('login'))
         else:
-            new_user=User(
+            new_user=Users(
                 email=email,
                 password=hash_password,
                 name=name,
@@ -271,7 +271,7 @@ def login():
     if login_form.validate_on_submit():
         email = login_form.email.data
         password = login_form.password.data
-        find_user = db.session.execute(db.select(User).where(User.email == email)).scalar()
+        find_user = db.session.execute(db.select(Users).where(Users.email == email)).scalar()
         if not find_user:
             flash("Invalid email, try again.")
             return redirect(url_for('register'))
@@ -304,7 +304,7 @@ def cart():
     if not current_user.is_authenticated:
         return redirect('login')
     # print(current_user.id)
-    user=db.get_or_404(User,current_user.id)
+    user=db.get_or_404(Users,current_user.id)
     if user:
         total=0
         for item in user.items:
@@ -321,33 +321,31 @@ def add_item(price):
     if not current_user.is_authenticated:
         return redirect('login')
 
-    price_int=int(price.strip("-"))
+    # price_int=int(price.strip("-"))
 
 
-    result = find_key_by_value(ITEMS_FOR_SALE, price_int)
-
+    # result = find_key_by_value(ITEMS_FOR_SALE, price_int)
+    result=db.get_or_404(Item,price)
     if result is not None:
         # print(f"The item with price {price_int} is associated with the key '{result}'")
         user=current_user
-        item = Item.query.filter_by(key=result, user_id=user.id).first()
+        item = Cart.query.filter_by(key=result.name, user_id=user.id).first()
         if item:
-            # flash("You've already added this item to your cart.")
-             pass
+            flash("You've already added this item to your cart.")
+
         else:
-            new_item=Item(
-                key=result,
-                title=ITEMS_FOR_SALE[result]['title'],
-                price=price,
+            new_item=Cart(
+                key=result.name,
+                title=result.title,
+                price=result.price,
                 user_id=user.id
             )
             db.session.add(new_item)
             db.session.commit()
             flash("Item added to your cart successfully.")
             return redirect(url_for('cart'))
-
     else:
-        print(f"No item found with price {price_int}")
-
+        print(f"No item found with price ")
     return redirect(url_for('cart'))
 
 
@@ -364,7 +362,11 @@ def delete(item_id):
 
 
 
-
+# with app.app_context():
+#     us=db.get_or_404(Users,1)
+#     print(us.email)
+#     for _ in us.items:
+#         print(_.title)
 
 
 
