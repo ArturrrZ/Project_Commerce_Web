@@ -5,7 +5,7 @@ from flask_bootstrap import Bootstrap5
 from flask_login import UserMixin, login_user, logout_user,login_required, LoginManager, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from forms import RegisterForm,LoginForm
-
+import datetime
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired, Email, Length
@@ -70,14 +70,15 @@ class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True, unique=True)
     user_name = db.Column(db.String(250), unique=False, nullable=False)
     body = db.Column(db.String(500), unique=False,nullable=False)
+    date=db.Column(db.String(50),nullable=False)
 
     item_id=db.Column(db.Integer,db.ForeignKey("item.id"),nullable=False)
     user_id=db.Column(db.Integer,db.ForeignKey("users.id"),nullable=False)
 
 
 
-with app.app_context():
-    db.create_all()
+# with app.app_context():
+#     db.create_all()
 
 Bootstrap5(app)
 
@@ -245,10 +246,27 @@ def sale(item):
     # return render_template('item_separate.html', item=ITEMS_FOR_SALE[item],name=item)
     form=CommentForm()
     item_for_sale = db.session.execute(db.select(Item).where(Item.name == item)).scalar()
+
+
     if form.validate_on_submit():
-        body=form.body.data
-        print(body)
-        return redirect(url_for('sale',item=item))
+        if current_user.is_authenticated:
+            user = db.get_or_404(Users, current_user.id)
+            body=form.body.data
+            print(body)
+            x=datetime.datetime.now()
+            date=x.strftime("%x")
+            new_comment=Comment(
+                user_name = user.email,
+                body = body,
+                item_id = item_for_sale.id,
+                user_id = user.id,
+                date=date,
+            )
+            db.session.add(new_comment)
+            db.session.commit()
+            return redirect(url_for('sale',item=item))
+        else:
+            return redirect(url_for('register'))
         # return render_template('item_separate.html',item=item_for_sale,form=form)
 
     return  render_template('item_separate.html',item=item_for_sale,form=form)
