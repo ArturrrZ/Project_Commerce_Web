@@ -73,7 +73,7 @@
             <div class="col-lg-5 offset-2">
                 {% for comment in item.comments: %}
                 <p>
-                    {{comment.date}} - {{comment.user_name}} <br />
+                    {{comment.date}} - {{comment.user_name}} {%if current_user.id ==1:%} <a href="{{url_for('delete_comment',comment_id=comment.id,item=item.name)}}">Delete Comment</a>{%endif%} <br />
                     {{comment.body}}
                 </p>
                 <hr />

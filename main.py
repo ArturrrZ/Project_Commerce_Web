@@ -1,4 +1,4 @@
-from flask import Flask, render_template,redirect, flash, url_for, request
+from flask import Flask, render_template,redirect, flash, url_for, request, abort
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from flask_bootstrap import Bootstrap5
@@ -9,6 +9,17 @@ import datetime
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired, Email, Length
+from functools import wraps
+def admin_only(function):
+    @wraps(function)
+
+    def decorated_function(*args,**kwargs):
+        # print(f"You called {function.__name__}{args}")
+        if not current_user.is_authenticated or current_user.id != 1:
+            return abort(403)  # Raise a Forbidden error if not authorized
+
+        return function(*args,**kwargs)
+    return decorated_function
 
 import os
 app=Flask(__name__)
@@ -416,7 +427,14 @@ def checking_for_reference():
                                      f"\nAnd description: {ArturZiianbaev.items[0].item.description}")
 
 
-
+@app.route("/delete_comment/<comment_id>?<item>")
+@admin_only
+def delete_comment(comment_id,item):
+    # print(comment_id)
+    db.session.delete(db.get_or_404(Comment,comment_id))
+    db.session.commit()
+    itemm=item
+    return redirect(url_for('sale',item=itemm))
 
 
 
